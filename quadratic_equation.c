@@ -1,10 +1,8 @@
-#include <gtk/gtk.h>
+#include <math.h>
 
-gdouble calculate_discriminant (gdouble a, gdouble b, gdouble c) {
-    return (b*b - (4 * a * c));
-}
+double calculate_discriminant (double a, double b, double c);
 
-void calculate_roots (gdouble a, gdouble b, gdouble c, gdouble *x1, gdouble *x2, gint *flag, gdouble *D) {
+void calculate_roots (double a, double b, double c, double *x1, double *x2, int *flag, double *D) {
     *D = calculate_discriminant(a,b,c);
     
     if (*D < 0){

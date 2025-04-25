@@ -1,0 +1,10 @@
+#image {width: 100px; height: 100px;}
+#label_nddi{font-size: 24px;font-weight: bold;}
+#btn{background:#EE7979; color:white;}
+
+#vbox {padding-top: 20px; padding: 50px; min-width:400px;}
+#abox {padding-top: 20px; padding: 50px;min-width:400px;}
+#log_name {font-size: 18px; font-weight: bold;}
+#v_section_label {font-size: 24px;font-weight: 600; border-bottom: 1px solid rgba(0,0,0,0.1); padding: 20px;}
+#abox_label {font-size: 20px; font-weight: bold;}
+grid {min-height: 1024px;}
