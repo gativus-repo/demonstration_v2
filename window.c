@@ -1,7 +1,8 @@
 #include <gtk/gtk.h>
 
-void calculate_roots (gdouble a, gdouble b, gdouble c, gdouble *x1, gdouble *x2, gint *flag, gdouble *D);
-gdouble __attribute__((section(".v_component"))) a,b,c,D,x1,x2;
+void calculate_roots (double a, double b, double c, double *x1, double *x2, int *flag, double *D);
+extern double a, b, c, D, x1, x2;
+
 
 // Функция-обработчик нажатия кнопки
 static void solve_equation(GtkWidget *widget, gpointer data) {
@@ -39,7 +40,7 @@ static void solve_equation(GtkWidget *widget, gpointer data) {
       GtkLabel *addr_label = g_object_get_data(G_OBJECT(data), addr_key);
       
       // Формируем строки для отображения
-      gchar *addr_str = g_strdup_printf("%s: %.2f; LOCN: %p",var_name, *(gdouble*)adress, adress);
+      gchar *addr_str = g_strdup_printf("LOCN(%s): %p, type: double, value: %.2f;",var_name,*(gdouble*)adress, adress);
       
       // Обновляем метки
       gtk_label_set_text(addr_label, addr_str);
@@ -78,28 +79,69 @@ int main(int argc, char **argv) {
 
     // Создание главного окна
     GtkWidget *window = gtk_window_new();
-    gtk_window_set_title(GTK_WINDOW(window), "Квадратное уравнение");
-    gtk_window_set_default_size(GTK_WINDOW(window), 640, 480);
-
+    GtkCssProvider *cssProvider = gtk_css_provider_new();
+    gtk_css_provider_load_from_path(cssProvider, "main.css");
+    gtk_style_context_add_provider_for_display(gdk_display_get_default(),     GTK_STYLE_PROVIDER(cssProvider), GTK_STYLE_PROVIDER_PRIORITY_USER);
+    
+    gtk_window_set_title(GTK_WINDOW(window), "NDDI - квадратное уравнение");
+    gtk_window_set_default_size(GTK_WINDOW(window), 1280, 1024);
+  
     // Создание вертикального контейнера для элементов
-    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 15);
+    GtkWidget *abox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 15);
+    GtkWidget *grid = gtk_grid_new();
+    
+    gtk_grid_set_column_homogeneous (GTK_GRID(grid), TRUE);
+    gtk_grid_set_column_spacing(GTK_GRID(grid), 0);
+    gtk_widget_set_name(grid, "grid");
+    gtk_widget_set_name(vbox, "vbox");
+    gtk_widget_set_name(abox, "abox");
+    gtk_widget_set_valign(abox, GTK_ALIGN_CENTER);
+    gtk_widget_set_halign(abox, GTK_ALIGN_CENTER);
+    
+    gtk_widget_set_valign(grid, GTK_ALIGN_CENTER);
+    gtk_widget_set_halign(grid, GTK_ALIGN_CENTER);
+    gtk_window_set_child(GTK_WINDOW(window), grid);
     gtk_widget_set_valign(vbox, GTK_ALIGN_CENTER);
-    gtk_window_set_child(GTK_WINDOW(window), vbox);
+    gtk_widget_set_halign(vbox, GTK_ALIGN_CENTER);
+    
+    GtkWidget *v_section_label = gtk_label_new("V - section");
+    gtk_widget_set_name(v_section_label, "v_section_label");
+    gtk_grid_attach(GTK_GRID(grid), v_section_label, 0, 0, 2, 1);
+    gtk_grid_set_row_spacing(GTK_GRID(grid), 15);
+    gtk_grid_attach(GTK_GRID(grid), vbox, 0, 1, 1, 1);
+    
+    GtkWidget *imageView = gtk_image_new_from_file ("NDDI.png");
+    gtk_image_set_pixel_size (GTK_IMAGE(imageView), 200);
+    GtkWidget *result_label_nddi = gtk_label_new("UNON - 95.161.61.217");
 
+    gtk_box_append(GTK_BOX(vbox), result_label_nddi);
+    gtk_box_append(GTK_BOX(vbox), imageView);
+    
+    gtk_widget_set_name(imageView, "image");
+    gtk_widget_set_name(result_label_nddi, "label_nddi");
+    
+    GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
+    gtk_box_append(GTK_BOX(vbox), separator);
+    
     // Метка для отображения результата
+    // GtkWidget *v_comp_label = gtk_label_new("V - компоненты:");
+    //  gtk_box_append(GTK_BOX(abox), v_comp_label);
+    GtkWidget *abox_label = gtk_label_new("Окно ввода");
+    gtk_box_append(GTK_BOX(abox), abox_label);
+    gtk_widget_set_name(abox_label, "abox_label");
     GtkWidget *result_label = gtk_label_new("Введите коэффициенты a, b, c");
-    gtk_box_append(GTK_BOX(vbox), result_label);
+    gtk_box_append(GTK_BOX(abox), result_label);
 
     // Создание полей ввода с метками
     GtkWidget *a_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     GtkWidget *a_label = gtk_label_new("a:");
-
     GtkWidget *a_entry = gtk_entry_new();
     gtk_box_append(GTK_BOX(a_box), a_label);
     gtk_widget_set_margin_end(a_label, 10);
     gtk_box_append(GTK_BOX(a_box), a_entry);
     gtk_widget_set_halign(a_box, GTK_ALIGN_CENTER);
-    gtk_box_append(GTK_BOX(vbox), a_box);
+    gtk_box_append(GTK_BOX(abox), a_box);
 
     GtkWidget *b_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     GtkWidget *b_label = gtk_label_new("b:");
@@ -108,7 +150,7 @@ int main(int argc, char **argv) {
     gtk_box_append(GTK_BOX(b_box), b_label);
     gtk_box_append(GTK_BOX(b_box), b_entry);
     gtk_widget_set_halign(b_box, GTK_ALIGN_CENTER);
-    gtk_box_append(GTK_BOX(vbox), b_box);
+    gtk_box_append(GTK_BOX(abox), b_box);
 
     GtkWidget *c_box = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 5);
     GtkWidget *c_label = gtk_label_new("c:");
@@ -117,15 +159,19 @@ int main(int argc, char **argv) {
     gtk_box_append(GTK_BOX(c_box), c_label);
     gtk_box_append(GTK_BOX(c_box), c_entry);
     gtk_widget_set_halign(c_box, GTK_ALIGN_CENTER);
-    gtk_box_append(GTK_BOX(vbox), c_box);
-
+    
+    gtk_box_append(GTK_BOX(abox), c_box);
+    gtk_grid_attach(GTK_GRID(grid), abox, 1, 1, 1, 1);
+    //gtk_box_append(GTK_BOX(vbox), abox);
     // Кнопка для решения уравнения
     GtkWidget *solve_button = gtk_button_new_with_label("Решить уравнение");
     gtk_widget_set_halign(solve_button, GTK_ALIGN_CENTER);
-    gtk_box_append(GTK_BOX(vbox), solve_button);
+    
+    gtk_widget_set_name(solve_button, "btn");
+    
+    gtk_box_append(GTK_BOX(abox), solve_button);
     
     // Разделитель и лог
-    GtkWidget *separator = gtk_separator_new(GTK_ORIENTATION_HORIZONTAL);
     gtk_box_append(GTK_BOX(vbox), separator);
 
     GtkWidget *log_box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
@@ -137,6 +183,10 @@ int main(int argc, char **argv) {
         GtkWidget *log_label = gtk_label_new(name);
         GtkWidget *address_label = gtk_label_new("");
         gtk_box_append(GTK_BOX(hbox), log_label);
+        
+        if (name == "Values:"){
+           gtk_widget_set_name(log_label, "log_name");
+        }
         gtk_box_append(GTK_BOX(hbox), address_label);
         gtk_box_append(GTK_BOX(parent), hbox);
         return address_label;
@@ -149,12 +199,13 @@ int main(int argc, char **argv) {
     g_object_set_data(G_OBJECT(window), "result-label", result_label);
 
     // Добавление переменных в лог
-    GtkWidget *a_address = create_log_row(log_box, "(a): ");
-    GtkWidget *b_address = create_log_row(log_box, "(b): ");
-    GtkWidget *c_address = create_log_row(log_box, "(c): ");
-    GtkWidget *D_address = create_log_row(log_box, "(D): ");
-    GtkWidget *x1_address = create_log_row(log_box, "(x1): ");
-    GtkWidget *x2_address = create_log_row(log_box, "(x2): ");
+    GtkWidget *log_name = create_log_row(log_box, "Values:");
+    GtkWidget *a_address = create_log_row(log_box, "");
+    GtkWidget *b_address = create_log_row(log_box, "");
+    GtkWidget *c_address = create_log_row(log_box, "");
+    GtkWidget *D_address = create_log_row(log_box, "");
+    GtkWidget *x1_address = create_log_row(log_box, "");
+    GtkWidget *x2_address = create_log_row(log_box, "");
 
     // Сохранение указателей на метки адресов
     g_object_set_data(G_OBJECT(window), "a_address_label", a_address);
@@ -177,6 +228,6 @@ int main(int argc, char **argv) {
     while (g_list_model_get_n_items(gtk_window_get_toplevels()) > 0) {
         g_main_context_iteration(NULL, TRUE);
     }
-
+    
     return 0;
 }
